@@ -1,0 +1,53 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    jdbc:
+      url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  hibernate-orm:
+    database:
+      default-schema: happy_takeaway
+  flyway:
+    schemas:
+      - happy_takeaway
+    migrate-at-start: true
+    baseline-on-migrate: true
+  kubernetes:
+    image-pull-policy: IfNotPresent
+    env:
+      secrets:
+        - order-service-db
+  container-image:
+    build: false
+    push: false
+    group: happy-takeaway
+    registry:
+    insecure: true
+  opentelemetry:
+    enabled: true
+  grpc:
+    server:
+      enable-reflection-service: true
+"%dev":
+  quarkus:
+    devservices:
+      enabled: false
+    test:
+      continuous-testing: disabled
+    http:
+      port: 8087
+    grpc:
+      server:
+        port: 9001
+    opentelemetry:
+      tracer:
+        exporter:
+          otlp:
+            endpoint:http://localhost:4317
+"%test":
+  quarkus:
+    datasource:
+      jdbc:
+        driver: org.testcontainers.jdbc.ContainerDatabaseDriver
+        url: jdbc:tc:postgresql:12:///
